@@ -1,0 +1,632 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>بوابة مودات ماين كرافت الاحترافية</title>
+    <style>
+        /* استيراد الخطوط العربية الفاخرة لضمان مظهر منسق وغير مشتت */
+        @import url('https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;600;700;900&family=Tajawal:wght@400;500;700;900&display=swap');
+
+        :root {
+            --primary: #10b981; /* أخضر ماين كرافت الزمردي */
+            --primary-glow: rgba(16, 185, 129, 0.4);
+            --secondary: #8b5cf6; /* بنفسجي غامض (بوابة النذر) */
+            --secondary-glow: rgba(139, 92, 246, 0.4);
+            --dark-bg: #090a0f;
+            --card-bg: rgba(17, 24, 39, 0.7);
+            --text-main: #f3f4f6;
+            --text-muted: #9ca3af;
+            --accent: #f59e0b; /* ذهبي براق */
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            user-select: none;
+        }
+
+        body {
+            font-family: 'Cairo', 'Tajawal', sans-serif;
+            background-color: var(--dark-bg);
+            color: var(--text-main);
+            overflow-x: hidden;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            position: relative;
+        }
+
+        /* الخلفية المتحركة */
+        .background-canvas {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+            pointer-events: none;
+        }
+
+        /* حاوية التصميم الرئيسية */
+        .container {
+            width: 100%;
+            max-width: 680px;
+            padding: 40px 20px;
+            z-index: 2;
+        }
+
+        /* البطاقة الرئيسية */
+        .glass-card {
+            background: var(--card-bg);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 24px;
+            padding: 40px 30px;
+            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5),
+                        inset 0 1px 0 rgba(255, 255, 255, 0.1);
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+
+        .glass-card:hover {
+            border-color: rgba(139, 92, 246, 0.3);
+            box-shadow: 0 30px 60px rgba(139, 92, 246, 0.15),
+                        0 0 40px rgba(16, 185, 129, 0.1);
+            transform: translateY(-5px);
+        }
+
+        /* تأثيرات الإضاءة الخلفية للبطاقة */
+        .glass-card::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(16, 185, 129, 0.08) 0%, transparent 50%);
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        /* غلاف الصورة الشخصية الفاخر */
+        .profile-container {
+            position: relative;
+            width: 150px;
+            height: 150px;
+            margin: 0 auto 24px;
+            z-index: 1;
+        }
+
+        .profile-glow {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            border-radius: 50%;
+            background: linear-gradient(45deg, var(--primary), var(--secondary));
+            filter: blur(12px);
+            opacity: 0.8;
+            animation: pulse-glow 3s infinite alternate;
+        }
+
+        .profile-pic {
+            position: relative;
+            width: 100%;
+            height: 100%;
+            border-radius: 50%;
+            background: #111827;
+            padding: 5px;
+            box-shadow: 0 0 20px rgba(0, 0, 0, 0.6);
+            border: 3px solid rgba(255, 255, 255, 0.1);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+        }
+
+        /* شعار SVG المودات والماين كرافت كبديل فائق السرعة للصورة */
+        .profile-pic svg {
+            width: 90%;
+            height: 90%;
+            filter: drop-shadow(0 0 8px rgba(16, 185, 129, 0.5));
+            animation: float-logo 4s ease-in-out infinite;
+        }
+
+        /* بادج مميز يعلو الصورة */
+        .badge {
+            position: absolute;
+            bottom: -5px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+            color: #ffffff;
+            font-size: 11px;
+            font-weight: 900;
+            padding: 4px 16px;
+            border-radius: 12px;
+            box-shadow: 0 4px 10px rgba(16, 185, 129, 0.5);
+            letter-spacing: 0.5px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            white-space: nowrap;
+        }
+
+        /* تفاصيل الاسم والوصف */
+        .channel-name {
+            font-size: 30px;
+            font-weight: 900;
+            margin-bottom: 12px;
+            background: linear-gradient(to left, #ffffff, #a7f3d0, #ffffff);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            filter: drop-shadow(0 2px 8px rgba(0, 0, 0, 0.5));
+            letter-spacing: -0.5px;
+        }
+
+        .channel-description {
+            font-size: 15px;
+            line-height: 1.8;
+            color: var(--text-muted);
+            margin-bottom: 30px;
+            padding: 0 10px;
+        }
+
+        /* قسم فريق العمل والمسؤولين */
+        .team-section {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 16px;
+            margin-bottom: 35px;
+        }
+
+        .team-card {
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 255, 255, 0.06);
+            border-radius: 16px;
+            padding: 18px 15px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            position: relative;
+            overflow: hidden;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            color: inherit;
+        }
+
+        /* تأثير البريق المعدني */
+        .team-card::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -150%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(
+                90deg,
+                transparent,
+                rgba(255, 255, 255, 0.08),
+                transparent
+            );
+            transition: 0.6s;
+        }
+
+        .team-card:hover::after {
+            left: 150%;
+        }
+
+        .team-card:hover {
+            background: rgba(255, 255, 255, 0.07);
+            border-color: rgba(255, 255, 255, 0.15);
+            transform: translateY(-3px);
+        }
+
+        .team-card.owner:hover {
+            box-shadow: 0 10px 20px rgba(139, 92, 246, 0.15);
+            border-color: rgba(139, 92, 246, 0.4);
+        }
+
+        .team-card.admin:hover {
+            box-shadow: 0 10px 20px rgba(16, 185, 129, 0.15);
+            border-color: rgba(16, 185, 129, 0.4);
+        }
+
+        .team-avatar {
+            width: 54px;
+            height: 54px;
+            border-radius: 12px;
+            background: #1f2937;
+            margin-bottom: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border: 2px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .team-avatar svg {
+            width: 32px;
+            height: 32px;
+        }
+
+        .team-role {
+            font-size: 11px;
+            font-weight: 700;
+            text-transform: uppercase;
+            padding: 2px 10px;
+            border-radius: 20px;
+            margin-bottom: 8px;
+        }
+
+        .owner .team-role {
+            background: rgba(139, 92, 246, 0.2);
+            color: #c084fc;
+            border: 1px solid rgba(139, 92, 246, 0.3);
+        }
+
+        .admin .team-role {
+            background: rgba(16, 185, 129, 0.2);
+            color: #34d399;
+            border: 1px solid rgba(16, 185, 129, 0.3);
+        }
+
+        .team-title {
+            font-size: 15px;
+            font-weight: 700;
+            color: #ffffff;
+        }
+
+        .team-subtitle {
+            font-size: 12px;
+            color: var(--text-muted);
+            margin-top: 2px;
+        }
+
+        /* زر الدخول الرئيسي الفاخر */
+        .cta-button {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
+            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+            color: #ffffff;
+            font-size: 18px;
+            font-weight: 800;
+            text-decoration: none;
+            padding: 18px 30px;
+            border-radius: 18px;
+            box-shadow: 0 8px 24px rgba(16, 185, 129, 0.4),
+                        inset 0 2px 0 rgba(255, 255, 255, 0.2);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            position: relative;
+            overflow: hidden;
+            transition: all 0.3s ease;
+            margin-top: 15px;
+        }
+
+        .cta-button::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(to right, transparent, rgba(255, 255, 255, 0.2), transparent);
+            transform: translateX(-100%);
+            transition: none;
+        }
+
+        .cta-button:hover::before {
+            transform: translateX(100%);
+            transition: transform 0.8s ease-in-out;
+        }
+
+        .cta-button:hover {
+            transform: scale(1.03) translateY(-2px);
+            box-shadow: 0 12px 30px rgba(16, 185, 129, 0.6),
+                        0 0 15px rgba(16, 185, 129, 0.3);
+            background: linear-gradient(135deg, #059669 0%, #047857 100%);
+        }
+
+        .cta-button:active {
+            transform: scale(0.98);
+        }
+
+        .cta-icon {
+            animation: pulse-icon 1.5s infinite;
+        }
+
+        /* ذيل الصفحة */
+        .footer {
+            margin-top: 30px;
+            font-size: 12px;
+            color: rgba(255, 255, 255, 0.2);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+        }
+
+        .footer svg {
+            width: 14px;
+            height: 14px;
+            fill: #ef4444;
+        }
+
+        /* الأنميشن والتحريكات الرائعة */
+        @keyframes pulse-glow {
+            0% {
+                transform: scale(0.95);
+                opacity: 0.6;
+            }
+            100% {
+                transform: scale(1.05);
+                opacity: 0.9;
+            }
+        }
+
+        @keyframes float-logo {
+            0%, 100% {
+                transform: translateY(0) rotate(0deg);
+            }
+            50% {
+                transform: translateY(-8px) rotate(3deg);
+            }
+        }
+
+        @keyframes pulse-icon {
+            0%, 100% {
+                transform: scale(1);
+            }
+            50% {
+                transform: scale(1.18);
+            }
+        }
+
+        /* توافق الشاشات الصغيرة */
+        @media (max-width: 480px) {
+            .glass-card {
+                padding: 30px 20px;
+            }
+            .team-section {
+                grid-template-columns: 1fr;
+            }
+            .channel-name {
+                font-size: 24px;
+            }
+            .cta-button {
+                font-size: 16px;
+                padding: 16px 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- خلفية تفاعلية بصرية -->
+    <canvas class="background-canvas" id="bgCanvas"></canvas>
+
+    <div class="container">
+        <!-- البطاقة التفاعلية الرئيسية -->
+        <div class="glass-card">
+            
+            <!-- صورة القناة الشخصية الفاخرة بـ SVG مدمج لمنع أي تأخير -->
+            <div class="profile-container">
+                <div class="profile-glow"></div>
+                <div class="profile-pic">
+                    <!-- لوجو ماين كرافت مخصص ثلاثي الأبعاد بالـ SVG فائق الجودة والسرعة -->
+                    <svg viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <defs>
+                            <linearGradient id="dirtGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+                                <stop offset="0%" stop-color="#4b2f1d"/>
+                                <stop offset="100%" stop-color="#2d1c11"/>
+                            </linearGradient>
+                            <linearGradient id="grassGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+                                <stop offset="0%" stop-color="#10b981"/>
+                                <stop offset="100%" stop-color="#047857"/>
+                            </linearGradient>
+                            <linearGradient id="swordGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+                                <stop offset="0%" stop-color="#60a5fa"/>
+                                <stop offset="100%" stop-color="#1d4ed8"/>
+                            </linearGradient>
+                        </defs>
+                        <!-- مكعب ماين كرافت الأساسي -->
+                        <path d="M50 15 L85 33 L85 67 L50 85 L15 67 L15 33 Z" fill="url(#dirtGrad)" stroke="#111827" stroke-width="3"/>
+                        <path d="M50 15 L85 33 L50 50 L15 33 Z" fill="url(#grassGrad)" stroke="#111827" stroke-width="2"/>
+                        <path d="M15 33 L50 50 L50 85" fill="none" stroke="#2c1a0e" stroke-width="3"/>
+                        <!-- السيف الـ Diamond المقاطع -->
+                        <path d="M40 60 L60 40 L65 45 L45 65 Z" fill="url(#swordGrad)" stroke="#ffffff" stroke-width="1.5"/>
+                        <rect x="36" y="60" width="8" height="8" rx="1" fill="#854d0e" stroke="#111827" transform="rotate(45 40 64)"/>
+                    </svg>
+                </div>
+                <div class="badge">مودات حصرية 🔥</div>
+            </div>
+
+            <!-- معلومات القناة -->
+            <h1 class="channel-name">Craft GO - كرافت جو</h1>
+            <p class="channel-description">
+                مرحباً بكم في العالم الأضخم لمودات ماين كرافت! هنا نقدم لكم أحدث وأقوى المودات الأسبوعية، الإضافات الخرافية، عوالم مخصصة، وشروحات كاملة لتطوير تجربتك البرمجية واللعب داخل ماين كرافت بطرق لم ترها من قبل. انضم إلينا الآن لتصبح محترفاً!
+            </p>
+
+            <!-- قسم المالك والإدارة -->
+            <div class="team-section">
+                <!-- المالك -->
+                <a href="https://t.me/Ossccar" class="team-card owner" target="_blank">
+                    <div class="team-avatar">
+                        <!-- أيقونة التاج المضيء -->
+                        <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M5 19H19V21H5V19ZM12 5L15.5 10.5L21 8L19 17H5L3 8L8.5 10.5L12 5Z" fill="#c084fc" stroke="#111827" stroke-width="1"/>
+                        </svg>
+                    </div>
+                    <span class="team-role">المالك - Owner</span>
+                    <span class="team-title">سلطان ماين كرافت</span>
+                    <span class="team-subtitle">تواصل خاص ومباشر</span>
+                </a>
+
+                <!-- الإدارة -->
+                <a href="https://t.me/Ossccar" class="team-card admin" target="_blank">
+                    <div class="team-avatar">
+                        <!-- أيقونة الدرع المضيء -->
+                        <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M12 2C12 2 20 4 20 10C20 15.5 16.5 19.5 12 22C7.5 19.5 4 15.5 4 10C4 4 12 2 12 2ZM11 7V13H13V7H11ZM11 15V17H13V15H11Z" fill="#34d399" stroke="#111827" stroke-width="1"/>
+                        </svg>
+                    </div>
+                    <span class="team-role">الإشراف - Admin</span>
+                    <span class="team-title">قناة الإدارة والمساعدة</span>
+                    <span class="team-subtitle">لتقديم الدعم والاستفسار</span>
+                </a>
+            </div>
+
+            <!-- زر الدخول للقناة الأساسية -->
+            <a href="https://t.me/craftgo1" class="cta-button" target="_blank">
+                <svg class="cta-icon" width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M21 12C21 16.9706 16.9706 21 12 21C7.02944 21 3 16.9706 3 12C3 7.02944 7.02944 3 12 3C16.9706 3 21 7.02944 21 12Z" stroke="#ffffff" stroke-width="2"/>
+                    <path d="M10 8L15 12L10 16V8Z" fill="#ffffff"/>
+                </svg>
+                <span>دخول قناة المودات الرسمية 🚀</span>
+            </a>
+
+            <!-- تذييل الصفحة -->
+            <div class="footer">
+                تم تصميمه بكل
+                <svg viewBox="0 0 24 24">
+                    <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/>
+                </svg>
+                لمجتمع ماين كرافت العربي
+            </div>
+
+        </div>
+    </div>
+
+    <!-- كود الجافا سكريبت لإنشاء جزيئات الخلفية المتفاعلة مع الماوس بديناميكية فائقة -->
+    <script>
+        const canvas = document.getElementById('bgCanvas');
+        const ctx = canvas.getContext('2d');
+
+        let particlesArray = [];
+        let mouse = {
+            x: null,
+            y: null,
+            radius: 120
+        }
+
+        // ضبط أحجام الكانفاس لتلائم شاشات الأجهزة بالكامل
+        function resizeCanvas() {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+        }
+        window.addEventListener('resize', resizeCanvas);
+        resizeCanvas();
+
+        // تتبع حركة الماوس لإنشاء تداخل تفاعلي مذهل مع الجزيئات
+        window.addEventListener('mousemove', function(event) {
+            mouse.x = event.x;
+            mouse.y = event.y;
+        });
+
+        window.addEventListener('mouseout', function() {
+            mouse.x = null;
+            mouse.y = null;
+        });
+
+        // كلاس بناء الجسيم المضيء
+        class Particle {
+            constructor(x, y, size, color, speedX, speedY) {
+                this.x = x;
+                this.y = y;
+                this.size = size;
+                this.color = color;
+                this.speedX = speedX;
+                this.speedY = speedY;
+                this.baseSize = size;
+            }
+
+            // رسم الجسيم وتأثير التوهج النيوني الخاص به
+            draw() {
+                ctx.beginPath();
+                ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2, false);
+                ctx.fillStyle = this.color;
+                ctx.shadowBlur = this.size * 3;
+                ctx.shadowColor = this.color;
+                ctx.fill();
+                ctx.shadowBlur = 0; // إعادة التعيين لعدم تدمير الأداء
+            }
+
+            // حركة وتفاعل الجسيم
+            update() {
+                // الفحص الدائم للحدود لإبقائه ضمن الإطار
+                if (this.x > canvas.width || this.x < 0) this.speedX = -this.speedX;
+                if (this.y > canvas.height || this.y < 0) this.speedY = -this.speedY;
+
+                this.x += this.speedX;
+                this.y += this.speedY;
+
+                // التفاعل المذهل عند الاقتراب من مؤشر الماوس
+                if (mouse.x != null && mouse.y != null) {
+                    let dx = mouse.x - this.x;
+                    let dy = mouse.y - this.y;
+                    let distance = Math.sqrt(dx * dx + dy * dy);
+                    if (distance < mouse.radius) {
+                        if (this.size < this.baseSize * 2.5) {
+                            this.size += 0.3;
+                        }
+                    } else if (this.size > this.baseSize) {
+                        this.size -= 0.1;
+                    }
+                } else if (this.size > this.baseSize) {
+                    this.size -= 0.1;
+                }
+
+                this.draw();
+            }
+        }
+
+        // تعبئة الخلفية بمصفوفة الجزيئات بألوان ماين كرافت (الأخضر والأرجواني اللامع)
+        function init() {
+            particlesArray = [];
+            let numberOfParticles = (canvas.width * canvas.height) / 14000;
+            const colors = [
+                'rgba(16, 185, 129, 0.45)', // الزمردي
+                'rgba(52, 211, 153, 0.35)', // الأخضر الفاتح
+                'rgba(139, 92, 246, 0.4)',  // بنفسجي البوابة
+                'rgba(167, 243, 208, 0.25)' // أبيض زمردي باهت
+            ];
+
+            for (let i = 0; i < numberOfParticles; i++) {
+                let size = (Math.random() * 3) + 1.2;
+                let x = Math.random() * canvas.width;
+                let y = Math.random() * canvas.height;
+                let speedX = (Math.random() * 0.6) - 0.3;
+                let speedY = (Math.random() * 0.6) - 0.3;
+                let color = colors[Math.floor(Math.random() * colors.length)];
+
+                particlesArray.push(new Particle(x, y, size, color, speedX, speedY));
+            }
+        }
+
+        // حلقة التحديث المستمر ومعدل الإطارات الفائق
+        function animate() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            for (let i = 0; i < particlesArray.length; i++) {
+                particlesArray[i].update();
+            }
+            requestAnimationFrame(animate);
+        }
+
+        window.onload = function() {
+            init();
+            animate();
+        };
+
+        // تحديث عدد الجسيمات عند تمدد أو صغر الشاشة تلقائياً لضمان ثبات الأداء
+        window.addEventListener('resize', function() {
+            init();
+        });
+    </script>
+</body>
+  </html>
